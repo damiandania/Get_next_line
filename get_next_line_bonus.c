@@ -6,7 +6,7 @@
 /*   By: ddania-c <ddania-c@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 14:55:46 by ddania-c          #+#    #+#             */
-/*   Updated: 2023/03/14 15:34:05 by ddania-c         ###   ########.fr       */
+/*   Updated: 2023/04/01 18:20:53 by ddania-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ char	*get_new_reserve(char *reserve, char *line)
 	int		i;
 	int		j;
 
+	if (!reserve)
+		return (NULL);
 	i = 0;
 	while (reserve[i] != '\0' && reserve[i] == line[i])
 		i++;
@@ -46,10 +48,10 @@ char	*reserve_to_line(char *reserve)
 
 	i = 0;
 	if (reserve[i] == '\0')
-		return (0);
+		return (NULL);
 	while ((reserve[i] != '\n') && (reserve[i] != '\0'))
 		i++;
-	line = malloc(sizeof(char *) * (i + 2));
+	line = malloc(sizeof(char) * (i + 2));
 	if (!line)
 		return (NULL);
 	j = -1;
@@ -57,7 +59,7 @@ char	*reserve_to_line(char *reserve)
 		line[j] = reserve[j];
 	if (reserve[j] == '\n')
 		line[j++] = '\n';
-	line[j] = '\0';
+	line[j++] = '\0';
 	return (line);
 }
 
@@ -85,7 +87,8 @@ char	*buffer_to_reserve(char *reserve, char *buffer)
 	while (buffer[j] != '\0')
 		dest[i++] = buffer[j++];
 	dest[i] = '\0';
-	return (free(reserve), dest);
+	free(reserve);
+	return (reserve = dest);
 }
 
 char	*read_and_reserve(int fd, char *reserve)
@@ -96,13 +99,17 @@ char	*read_and_reserve(int fd, char *reserve)
 	n_readed = 1;
 	buffer = malloc(sizeof(char *) * (BUFFER_SIZE + 1));
 	if (!buffer)
+	{
+		free(reserve);
 		return (NULL);
+	}
 	while (n_readed != 0 && ft_strchr(reserve) == NULL)
 	{
 		n_readed = read(fd, buffer, BUFFER_SIZE);
 		if (n_readed == -1)
 		{
 			free(buffer);
+			free(reserve);
 			return (NULL);
 		}
 		buffer[n_readed] = '\0';
